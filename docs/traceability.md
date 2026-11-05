@@ -331,7 +331,7 @@ A business rule (`BR-*`, owned by [business-rules.md](requirements/business-rule
 
 > ⚙️ **Generated, do not hand-edit.** This table is a *projection* of the forward citations — the use cases' **Business Rules** fields, the SRS's rule citations, and the NFR matrix's `QS-<slug>` rows — not a second authored copy of them (that would violate "cited, never restated" and drift). `/spec-build` **regenerates and verifies** it against the live citations; a row that disagrees with them is a flagged defect, and edits belong in the citing artifacts, not here. The two universal access rules (`BR-role-based-access`, `BR-team-scoped-access`) are cited by essentially every authoring/CRUD use case and are summarized by count rather than enumerated (the same noise-reduction convention as the functional matrix's omitted `FR-SEC-*` column). This index is the **spec-level** backward view (which requirements *cite* a rule); its **code-level** companion — which `file:method` *enforces* each rule — lives in `/sync-check`'s `BR → enforcement-point` map. Together they trace a rule → requirements → code.
 >
-> **Last regenerated:** 2026-10-03 (against the citations as of this commit).
+> **Last regenerated:** 2026-11-04 (against the citations as of this commit).
 
 | Business rule | Cited by use cases | SRS | QS |
 |---|---|---|---|
@@ -346,6 +346,7 @@ A business rule (`BR-*`, owned by [business-rules.md](requirements/business-rule
 | `BR-deletion-integrity` | `UC-ART-delete-artifact`, `UC-GLO-delete-term` | `DI-artifact-key-assignment`, `DI-referential-integrity`, `DI-soft-delete-retention`, (prose) | — |
 | `BR-document-creation` | `UC-TPL-provision-documents` | — | — |
 | `BR-edit-lock-required` | `UC-COL-collaborative-edit`, `UC-DOC-edit-document`, `UC-DOC-edit-use-case` | `DI-concurrency-control`, (prose) | — |
+| `BR-evaluation-active-evaluatee` | `UC-EVA-submit-evaluation`, `UC-STU-deactivate-student` | — | — |
 | `BR-evaluation-editable-until-close` | `UC-EVA-submit-evaluation` | — | — |
 | `BR-evaluation-private-comment` | `UC-EVA-section-evaluation-report`, `UC-EVA-student-evaluation-report`, `UC-EVA-submit-evaluation`, `UC-EVA-view-own-evaluation` | `FR-SEC-authorization` | — |
 | `BR-evaluation-submission-window` | `UC-EVA-submit-evaluation`, `UC-NOT-remind-non-submitters` | — | — |
@@ -372,4 +373,4 @@ A business rule (`BR-*`, owned by [business-rules.md](requirements/business-rule
 | `BR-team-single-instructor` | `UC-INS-assign-instructors`, `UC-INS-remove-instructor` | — | — |
 | `BR-use-case-name-unique` | `UC-DOC-create-use-case` | — | — |
 
-> **Readout.** All 36 rules have at least one enforcer, so the backward view confirms the forward coverage check from the other direction. Two rules are load-bearing (`BR-role-based-access` 41 UCs, `BR-team-scoped-access` 30 UCs), so touching either is a project-wide change, which is exactly what the index makes visible. `BR-team-scoped-access` grew from 26 to 30 citing use cases on 2026-09-07, when OI-50 widened it from requirement content to all team-owned student work and the weekly-activity-report and peer-evaluation use cases began citing it; `BR-section-scoped-access` is its instructor-side companion, added in the same change. The `(prose)` SRS entries are rules the SRS cites in narrative (for example the locking rules in the autosave/persistence discussion) rather than from a specific `FR-*`.
+> **Readout.** All 37 rules have at least one enforcer, so the backward view confirms the forward coverage check from the other direction. Two rules are load-bearing (`BR-role-based-access` 41 UCs, `BR-team-scoped-access` 30 UCs), so touching either is a project-wide change, which is exactly what the index makes visible. `BR-team-scoped-access` grew from 26 to 30 citing use cases on 2026-09-07, when OI-50 widened it from requirement content to all team-owned student work and the weekly-activity-report and peer-evaluation use cases began citing it; `BR-section-scoped-access` is its instructor-side companion, added in the same change. The `(prose)` SRS entries are rules the SRS cites in narrative (for example the locking rules in the autosave/persistence discussion) rather than from a specific `FR-*`.
