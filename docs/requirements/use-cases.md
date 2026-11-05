@@ -1484,7 +1484,7 @@ Details:
 
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
-**Business Rules:** BR-student-lifecycle, BR-evaluation-active-evaluatee, BR-evaluation-deactivation-history
+**Business Rules:** BR-student-lifecycle, BR-evaluation-active-evaluatee, BR-evaluation-deactivation-history, BR-war-deactivation-history
 
 **Associated Information:**
 - Consequence of the deactivation: Access revocation is governed by FR-SEC-active-account; team membership is governed by BR-student-lifecycle; submission obligations are governed by BR-submission-owed; peer-evaluation submissions and edits targeting this student are governed by BR-evaluation-active-evaluatee; historical peer-evaluation reports are governed by BR-evaluation-deactivation-history. The student's account, historical weekly activity reports, and peer evaluations are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
@@ -2092,7 +2092,7 @@ The student shall be able to cancel the use case at any time prior to submitting
 
 **Priority:** High
 **Frequency of Use:** Approximately 37 users, average of 1 usage per week.
-**Business Rules:** BR-team-scoped-access (a student may generate the report only for a team she belongs to), BR-section-scoped-access (an instructor may generate it only for a team in a course section she is assigned to), BR-role-based-access, BR-submission-owed (who has not turned in the WAR).
+**Business Rules:** BR-team-scoped-access (a student may generate the report only for a team she belongs to), BR-section-scoped-access (an instructor may generate it only for a team in a course section she is assigned to), BR-role-based-access, BR-submission-owed (who has not turned in the WAR), BR-war-deactivation-history.
 
 **Associated Information:**
 
@@ -2156,7 +2156,7 @@ Report generating algorithm: N/A
 
 **Priority:** High
 **Frequency of Use:** 2 users, average of 10 usage per week.
-**Business Rules:** BR-section-scoped-access, BR-role-based-access (the instructor may generate the report only for a student in a course section she is assigned to).
+**Business Rules:** BR-section-scoped-access, BR-role-based-access (the instructor may generate the report only for a student in a course section she is assigned to), BR-war-deactivation-history.
 
 **Associated Information:**
 
