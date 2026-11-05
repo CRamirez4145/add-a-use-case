@@ -1473,6 +1473,11 @@ Details:
 7. Use case ends.
 
 **Extensions:**
+- **6a. Student is already deactivated when the request is processed:**
+  - 6a1. This includes another authorized instructor deactivating the student after the confirmation dialog is displayed and before the request is processed.
+  - 6a2. The system displays "Student is already deactivated" without modifying any data or reporting a new successful deactivation.
+  - 6a3. Use case ends.
+
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle
