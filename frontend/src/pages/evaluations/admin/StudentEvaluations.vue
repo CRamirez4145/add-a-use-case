@@ -88,12 +88,9 @@ import type {
   RatingAverage
 } from '@/apis/evaluation/types'
 import SearchPeriod from '@/components/SearchPeriod.vue'
-import { useSettingsStore } from '@/stores/settings'
 import { Line } from 'vue-chartjs'
 
-const { studentId } = defineProps(['studentId'])
-const settingsStore = useSettingsStore()
-const studentSectionId = settingsStore.defaultSectionId
+const { studentId, sectionId } = defineProps<{ studentId: number; sectionId: number }>()
 const peerEvalutionAverages = ref<PeerEvaluationAverage[]>()
 const criteria = ref<Criterion[]>([]) // Criteria used for peer evaluations
 const loading = ref<boolean>(true)
@@ -112,7 +109,7 @@ onMounted(async () => {
 
 // Load criteria information
 async function loadCriteria() {
-  const sectionResult: FindSectionByIdResponse = await findSectionById(studentSectionId)
+  const sectionResult: FindSectionByIdResponse = await findSectionById(sectionId)
   const rubricResult: FindRubricByIdResponse = await findRubricById(
     sectionResult.data.rubricId as number
   )

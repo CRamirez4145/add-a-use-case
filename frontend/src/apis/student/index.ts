@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import type { DeactivateStudentResponse } from './types'
 import type {
   PaginationParams,
   StudentSearchCriteria,
@@ -39,3 +40,8 @@ export const updateStudent = (updatedStudent: Student) =>
 
 export const deleteStudent = (id: number) =>
   request.delete<any, DeleteStudentResponse>(`${API.STUDENTS_ENDPOINT}/${id}`)
+
+export const deactivateStudent = (sectionId: number, studentId: number) =>
+  request.post<any, DeactivateStudentResponse>(
+    `/sections/${sectionId}/students/${studentId}/deactivation`
+  )
