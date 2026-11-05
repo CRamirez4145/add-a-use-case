@@ -29,6 +29,10 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.RequestMatcherDelegatingAccessDeniedHandler;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import team.projectpulse.student.StudentDeactivationAccessDeniedHandler;
 import team.projectpulse.security.authorizationmanagers.*;
 
 import java.security.KeyPair;
@@ -135,7 +139,15 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+            StudentReadAuthorizationManager studentReadAuthorizationManager,
+            StudentDeactivationAuthorizationManager studentDeactivationAuthorizationManager,
+            StudentDeactivationAccessDeniedHandler studentDeactivationAccessDeniedHandler) throws Exception {
+        var commandMatcher = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST,
+                this.baseUrl + "/sections/{sectionId}/students/{studentId}/deactivation");
+        AccessDeniedHandler deniedHandler = new RequestMatcherDelegatingAccessDeniedHandler(
+                new java.util.LinkedHashMap<>(java.util.Map.of(commandMatcher, studentDeactivationAccessDeniedHandler)),
+                this.customBearerTokenAccessDeniedHandler);
         return http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         // Security rules for the /courses/** endpoint.
@@ -203,7 +215,8 @@ public class SecurityConfiguration {
                         // Security rules for the /students/** endpoint.
                         .requestMatchers(HttpMethod.POST, this.baseUrl + "/students/search").hasAuthority("ROLE_instructor")
                         .requestMatchers(HttpMethod.POST, this.baseUrl + "/students").permitAll()
-                        .requestMatchers(HttpMethod.GET, this.baseUrl + "/students/{studentId}").access(this.userOwnershipAuthorizationManager)
+                        .requestMatchers(HttpMethod.GET, this.baseUrl + "/students/{studentId}").access(studentReadAuthorizationManager)
+                        .requestMatchers(commandMatcher).access(studentDeactivationAuthorizationManager)
                         .requestMatchers(HttpMethod.PUT, this.baseUrl + "/students/{studentId}").access(this.userOwnershipAuthorizationManager)
                         .requestMatchers(HttpMethod.DELETE, this.baseUrl + "/students/{studentId}").access(this.userOwnershipAuthorizationManager)
                         .requestMatchers(HttpMethod.GET, this.baseUrl + "/students/teams/{teamId}").access(this.teamMembershipAuthorizationManager)
@@ -320,7 +333,8 @@ public class SecurityConfiguration {
                 .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer
                         .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(this.customBearerTokenAuthenticationEntryPoint)
-                        .accessDeniedHandler(this.customBearerTokenAccessDeniedHandler))
+                        .accessDeniedHandler(deniedHandler))
+                .exceptionHandling(exceptions -> exceptions.accessDeniedHandler(deniedHandler))
                 /* Configures the spring boot application as an OAuth2 Resource Server which authenticates all
                  the incoming requests (except the ones excluded above) using JWT authentication.
                  */
