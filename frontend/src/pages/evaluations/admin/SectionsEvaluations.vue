@@ -32,7 +32,10 @@
       scrollbar-always-on
     >
       <el-table-column label="Student" min-width="100px" fixed>
-        <template #default="{ row }"> {{ row.lastName }}, {{ row.firstName }} </template>
+        <template #default="{ row }">
+          {{ row.lastName }}, {{ row.firstName }}
+          <el-tag v-if="row.enabled === false" type="info">Deactivated</el-tag></template
+        >
       </el-table-column>
       <el-table-column label="Average Total Score" min-width="100px" fixed>
         <template #default="{ row }">
@@ -108,12 +111,12 @@
         border
         scrollbar-always-on
       >
-        <el-table-column
-          label="Evaluator"
-          prop="evaluatorName"
-          min-width="100"
-          fixed
-        ></el-table-column>
+        <el-table-column label="Evaluator" prop="evaluatorName" min-width="100" fixed>
+          <template #default="{ row }"
+            >{{ row.evaluatorName }}
+            <el-tag v-if="row.evaluatorEnabled === false" type="info">Deactivated</el-tag></template
+          >
+        </el-table-column>
         <el-table-column v-for="criterion in criteria" :key="criterion.criterionId" min-width="150">
           <template #header>
             <el-tooltip effect="dark" :content="criterion.criterion" placement="top">

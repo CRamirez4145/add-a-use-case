@@ -1,4 +1,6 @@
 export interface PeerEvaluation {
+  evaluatorEnabled?: boolean
+  evaluateeEnabled?: boolean
   evaluationId?: number
   week: string
   evaluatorId?: number
@@ -42,6 +44,7 @@ export interface UpdatePeerEvaluationResponse {
 }
 
 export interface PeerEvaluationAverage {
+  enabled?: boolean
   studentId: number
   week: string
   firstName: string

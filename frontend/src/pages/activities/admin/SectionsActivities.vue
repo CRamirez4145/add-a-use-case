@@ -31,13 +31,14 @@
             border
             scrollbar-always-on
           >
-            <el-table-column
-              label="Student"
-              width="150"
-              min-width="100"
-              prop="studentName"
-              fixed
-            ></el-table-column>
+            <el-table-column label="Student" width="150" min-width="100" prop="studentName" fixed
+              ><template #default="{ row }"
+                >{{ row.studentName }}
+                <el-tag v-if="row.studentEnabled === false" type="info"
+                  >Deactivated</el-tag
+                ></template
+              ></el-table-column
+            >
             <el-table-column label="Category" width="150" prop="category">
               <template #default="{ row }">
                 <el-tag type="warning">{{ row.category }}</el-tag>
@@ -108,12 +109,12 @@
         border
         scrollbar-always-on
       >
-        <el-table-column
-          label="Evaluator"
-          prop="evaluatorName"
-          min-width="100"
-          fixed
-        ></el-table-column>
+        <el-table-column label="Evaluator" prop="evaluatorName" min-width="100" fixed
+          ><template #default="{ row }"
+            >{{ row.evaluatorName }}
+            <el-tag v-if="row.evaluatorEnabled === false" type="info">Deactivated</el-tag></template
+          ></el-table-column
+        >
         <el-table-column label="Public Comment" min-width="200px">
           <template #default="{ row }">
             {{ row.publicComment }}

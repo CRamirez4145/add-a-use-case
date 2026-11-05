@@ -37,10 +37,17 @@ function showDeactivationError(message: string): Promise<boolean> {
           style.display !== 'none' &&
           style.visibility === 'visible' &&
           Number(style.opacity) > 0 &&
+          !element.classList.contains('el-message-fade-enter-active') &&
           bounds.width > 0 &&
           bounds.height > 0 &&
           bounds.bottom > 0 &&
-          bounds.top < innerHeight
+          bounds.top < innerHeight &&
+          element.contains(
+            document.elementFromPoint(
+              bounds.left + bounds.width / 2,
+              bounds.top + bounds.height / 2
+            )
+          )
         ) {
           resolve(true)
           return

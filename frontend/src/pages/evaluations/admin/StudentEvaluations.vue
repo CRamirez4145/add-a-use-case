@@ -25,6 +25,12 @@
           scrollbar-always-on
         >
           <el-table-column label="Week" prop="week"></el-table-column>
+          <el-table-column label="Account status"
+            ><template #default="{ row }"
+              ><el-tag v-if="row.enabled === false" type="info">Deactivated</el-tag
+              ><span v-else>Active</span></template
+            ></el-table-column
+          >
           <el-table-column label="Average Total Score" min-width="100px">
             <template #default="{ row }">
               {{ row.averageTotalScore.toFixed(2) }}

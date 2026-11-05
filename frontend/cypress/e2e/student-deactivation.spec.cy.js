@@ -238,6 +238,7 @@ describe('Student deactivation and scoped details', () => {
 
     it(`shows exact ${error.status} feedback without success (T23)`, () => {
       const navigationSnapshots = []
+      const navigationDiagnostics = []
       visitDetails(callers[1], {
         statusCode: error.status,
         body: { flag: false, code: error.status, message: error.message, data: null }
@@ -249,6 +250,20 @@ describe('Student deactivation and scoped details', () => {
           // Capture the rendered feedback before delegating to the real navigation.
           // Checking only the final page and toast would also pass if feedback appeared too late.
           const toast = win.document.querySelector('.el-message--error')
+          if (toast) {
+            const bounds = toast.getBoundingClientRect()
+            const style = win.getComputedStyle(toast)
+            navigationDiagnostics.push({
+              classes: toast.className,
+              opacity: style.opacity,
+              zIndex: style.zIndex,
+              bounds: bounds.toJSON(),
+              coveringElement: win.document.elementFromPoint(
+                bounds.x + bounds.width / 2,
+                bounds.y + bounds.height / 2
+              )?.outerHTML
+            })
+          }
           navigationSnapshots.push({
             from: win.location.pathname,
             message: toast?.querySelector('.el-message__content')?.textContent?.trim(),
@@ -265,7 +280,10 @@ describe('Student deactivation and scoped details', () => {
       cy.location('pathname').should('not.eq', '/students/4')
       cy.then(() => {
         expect(navigationSnapshots, 'one error navigation').to.have.length(1)
-        expect(navigationSnapshots[0], 'visible exact feedback before URL changes').to.deep.equal({
+        expect(
+          navigationSnapshots[0],
+          `visible exact feedback before URL changes: ${JSON.stringify(navigationDiagnostics)}`
+        ).to.deep.equal({
           from: '/students/4',
           message: error.message,
           visible: true

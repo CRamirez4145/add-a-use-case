@@ -1,4 +1,5 @@
 export interface Activity {
+  studentEnabled?: boolean
   activityId?: number
   studentId?: number
   studentName?: string
