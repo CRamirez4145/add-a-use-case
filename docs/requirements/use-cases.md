@@ -1458,7 +1458,7 @@ Details:
 
 **Preconditions:**
 - PRE-1. The course admin or instructor is logged into the system.
-- PRE-2. There exists at least one active student in the system.
+- PRE-2. The target student exists; her account need not be active.
 
 **Postconditions:**
 - POST-1. The student's account is deactivated.
