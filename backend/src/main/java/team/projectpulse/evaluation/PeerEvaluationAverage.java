@@ -4,6 +4,11 @@ import java.util.List;
 
 public class PeerEvaluationAverage {
 
+    private boolean enabled;
+
+    public boolean isEnabled() { return this.enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
     private Integer studentId;
     private String week;
     private String firstName;

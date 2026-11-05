@@ -196,6 +196,7 @@ public class EvaluationService {
         PeerEvaluationAverage peerEvaluationAverage = new PeerEvaluationAverage();
 
         peerEvaluationAverage.setStudentId(student.getId());
+        peerEvaluationAverage.setEnabled(student.isEnabled());
         peerEvaluationAverage.setWeek(week);
         peerEvaluationAverage.setFirstName(student.getFirstName());
         peerEvaluationAverage.setLastName(student.getLastName());
@@ -243,7 +244,10 @@ public class EvaluationService {
         report.setSectionName(this.sectionRepository.findById(sectionId).orElseThrow(() -> new ObjectNotFoundException("section", sectionId)).getSectionName());
 
         // Get all students in the section
-        List<Student> students = this.studentRepository.findBySectionSectionId(sectionId).stream().filter(student -> student.getTeam() != null).collect(Collectors.toList());
+        List<Student> students = this.studentRepository.findBySectionSectionId(sectionId).stream()
+                .filter(student -> student.getTeam() != null)
+                .filter(student -> student.isEnabled() || this.evaluationRepository.hasHistoricalParticipation(week, student.getId()))
+                .collect(Collectors.toList());
 
         // For each student, compute her average total score, collect all public comments and private comments, and compute rating averages for each criterion.
         students.forEach(student -> {
@@ -271,7 +275,9 @@ public class EvaluationService {
 
         List<String> weeks = getWeeksBetween(startWeek, endWeek);
 
-        List<PeerEvaluationAverage> peerEvaluationAverages = weeks.stream().map(week -> getPeerEvaluationAverage(week, student)).collect(Collectors.toList());
+        List<PeerEvaluationAverage> peerEvaluationAverages = weeks.stream()
+                .filter(week -> student.isEnabled() || this.evaluationRepository.hasHistoricalParticipation(week, studentId))
+                .map(week -> getPeerEvaluationAverage(week, student)).collect(Collectors.toList());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

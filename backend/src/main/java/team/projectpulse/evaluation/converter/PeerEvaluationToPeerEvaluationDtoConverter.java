@@ -35,7 +35,9 @@ public class PeerEvaluationToPeerEvaluationDtoConverter implements Converter<Pee
                 peerEvaluation.getPublicComment(),
                 peerEvaluation.getPrivateComment(),
                 peerEvaluation.getCreatedAt(),
-                peerEvaluation.getUpdatedAt()
+                peerEvaluation.getUpdatedAt(),
+                peerEvaluation.getEvaluator().isEnabled(),
+                peerEvaluation.getEvaluatee().isEnabled()
         );
     }
 

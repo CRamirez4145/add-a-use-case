@@ -31,5 +31,12 @@ public record ActivityDto(Integer activityId,
                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
                           LocalDateTime createdAt,
                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
-                          LocalDateTime updatedAt) {
+                          LocalDateTime updatedAt,
+                          Boolean studentEnabled) {
+    public ActivityDto(Integer activityId, Integer studentId, String studentName, String week, Integer teamId,
+            String teamName, ActivityCategory category, String activity, String description, Double plannedHours,
+            Double actualHours, ActivityStatus status, String comments, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this(activityId, studentId, studentName, week, teamId, teamName, category, activity, description,
+                plannedHours, actualHours, status, comments, createdAt, updatedAt, null);
+    }
 }

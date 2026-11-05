@@ -25,7 +25,8 @@ public class ActivityToActivityDtoConverter implements Converter<Activity, Activ
                 activity.getStatus(),
                 activity.getComments(),
                 activity.getCreatedAt(),
-                activity.getUpdatedAt()
+                activity.getUpdatedAt(),
+                activity.getStudent().isEnabled()
         );
     }
 
