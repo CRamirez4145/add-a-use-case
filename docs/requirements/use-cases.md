@@ -1473,6 +1473,10 @@ Details:
 7. Use case ends.
 
 **Extensions:**
+- **5a. User cancels or dismisses the confirmation warning:**
+  - 5a1. Cancel, the close button, Escape, and clicking outside the dialog are treated as cancellation wherever those dismissal methods are supported.
+  - 5a2. The system closes the dialog and returns to the student's details without sending a deactivation request, modifying any data, or displaying a success message.
+  - 5a3. Use case ends.
 - **6a. Student is already deactivated when the request is processed:**
   - 6a1. This includes another authorized instructor deactivating the student after the confirmation dialog is displayed and before the request is processed.
   - 6a2. The system displays "Student is already deactivated" without modifying any data or reporting a new successful deactivation.
