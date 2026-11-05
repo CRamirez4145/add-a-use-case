@@ -1477,6 +1477,10 @@ Details:
   - 6a1. This includes another authorized instructor deactivating the student after the confirmation dialog is displayed and before the request is processed.
   - 6a2. The system displays "Student is already deactivated" without modifying any data or reporting a new successful deactivation.
   - 6a3. Use case ends.
+- **6b. Student was deleted before the deactivation request is processed:**
+  - 6b1. The system treats the request as a not-found condition and displays "Student no longer exists".
+  - 6b2. The system makes no changes and does not report successful deactivation.
+  - 6b3. Use case ends.
 
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
