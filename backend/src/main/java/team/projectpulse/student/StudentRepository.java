@@ -13,6 +13,18 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Integer>, JpaSpecificationExecutor<Student> {
 
+    // Read access only. Ownership is resolved through the target's actual course section;
+    // neither a caller default nor an administrator authority establishes that scope.
+    @Query("""
+            select student from Student student
+            where student.id = :studentId and
+              (student.id = :callerId
+               or student.section.course.courseAdmin.id = :callerId
+               or exists (select section.sectionId from Section section join section.instructors instructor
+                          where section = student.section and instructor.id = :callerId))
+            """)
+    Optional<Student> findReadableById(Integer studentId, Integer callerId);
+
     /**
      * Shared serialization point for deactivation and evaluation writes. The caller must hold a transaction.
      * An evaluation caller that already loaded the student must also refresh it under this lock before
