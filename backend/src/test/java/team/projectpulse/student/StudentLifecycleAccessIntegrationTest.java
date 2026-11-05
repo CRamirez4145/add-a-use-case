@@ -213,9 +213,26 @@ class StudentLifecycleAccessIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void studentWithoutTeamCanBeDeactivated() throws Exception {
-        Student student = target(); student.setTeam(null); em.flush();
+        // UC-STU-deactivate-student step 6 / design T3: no team does not prevent deactivation.
+        Student student = target();
+        student.setTeam(null);
+        em.flush();
+        int studentId = student.getId();
+        em.clear();
+        student = students.findById(studentId).orElseThrow();
+        assertThat(student.isEnabled()).as("initially active").isTrue();
+        assertThat(student.getTeam()).as("initially without a team").isNull();
+
         mvc.perform(post(command(student)).header("Authorization", login("b.gates@abc.edu")))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.student.teamId").isEmpty());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.outcome").value("DEACTIVATED"))
+                .andExpect(jsonPath("$.data.student.teamId").isEmpty());
+
+        em.flush();
+        em.clear();
+        Student persisted = students.findById(studentId).orElseThrow();
+        assertThat(persisted.isEnabled()).as("persisted account is deactivated").isFalse();
+        assertThat(persisted.getTeam()).as("deactivation retains absent team membership").isNull();
     }
 
     @Test
