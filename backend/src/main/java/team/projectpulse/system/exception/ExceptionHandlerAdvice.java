@@ -37,6 +37,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
 
+    @ExceptionHandler(team.projectpulse.student.StudentDeactivationDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    Result handleStudentDeactivationDenied(team.projectpulse.student.StudentDeactivationDeniedException ex) {
+        return new Result(false, StatusCode.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(team.projectpulse.student.StudentDeactivationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    Result handleStudentDeactivationNotFound(team.projectpulse.student.StudentDeactivationNotFoundException ex) {
+        return new Result(false, StatusCode.NOT_FOUND, ex.getMessage());
+    }
+
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     Result handleObjectNotFoundException(ObjectNotFoundException ex) {
