@@ -1484,10 +1484,10 @@ Details:
 
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
-**Business Rules:** BR-student-lifecycle, BR-evaluation-active-evaluatee
+**Business Rules:** BR-student-lifecycle, BR-evaluation-active-evaluatee, BR-evaluation-deactivation-history
 
 **Associated Information:**
-- Consequence of the deactivation: Access revocation is governed by FR-SEC-active-account; team membership is governed by BR-student-lifecycle; submission obligations are governed by BR-submission-owed; peer-evaluation submissions and edits targeting this student are governed by BR-evaluation-active-evaluatee. The student's account, historical weekly activity reports, and peer evaluations are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
+- Consequence of the deactivation: Access revocation is governed by FR-SEC-active-account; team membership is governed by BR-student-lifecycle; submission obligations are governed by BR-submission-owed; peer-evaluation submissions and edits targeting this student are governed by BR-evaluation-active-evaluatee; historical peer-evaluation reports are governed by BR-evaluation-deactivation-history. The student's account, historical weekly activity reports, and peer evaluations are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
 
 **Related Use Cases:** UC-STU-delete-student: Delete a student; UC-STU-reactivate-student: Reactivate a student
 **Assumptions:**
@@ -2293,7 +2293,7 @@ Private comments are for the instructor only. Public comments will be sent to th
 
 **Priority:** High
 **Frequency of Use:** Approximately 35-40 users, average of 1 usage per week.
-**Business Rules:** BR-team-scoped-access, BR-evaluation-visibility, BR-evaluation-private-comment (the student sees only her own results, and never another team's)
+**Business Rules:** BR-team-scoped-access, BR-evaluation-visibility, BR-evaluation-private-comment (the student sees only her own results, and never another team's), BR-evaluation-deactivation-history
 
 **Associated Information:**
 
@@ -2352,7 +2352,7 @@ Report generating algorithm: For each individual criterion score (e.g., Quality 
 
 **Priority:** High
 **Frequency of Use:** Approximately 2 users, average of 1 usage per week.
-**Business Rules:** BR-section-scoped-access (the instructor may generate the report only for a course section she is assigned to), BR-evaluation-private-comment, BR-submission-owed (who has not turned in the peer evaluation)
+**Business Rules:** BR-section-scoped-access (the instructor may generate the report only for a course section she is assigned to), BR-evaluation-private-comment, BR-submission-owed (who has not turned in the peer evaluation), BR-evaluation-deactivation-history
 
 **Associated Information:**
 
@@ -2424,7 +2424,7 @@ Details of a peer evaluation: The instructor may choose to see more details of o
 
 **Priority:** High
 **Frequency of Use:** 2 users, average of 10 usage per week.
-**Business Rules:** BR-section-scoped-access (the instructor may generate the report only for a student in a course section she is assigned to), BR-evaluation-private-comment
+**Business Rules:** BR-section-scoped-access (the instructor may generate the report only for a student in a course section she is assigned to), BR-evaluation-private-comment, BR-evaluation-deactivation-history
 
 **Associated Information:**
 
