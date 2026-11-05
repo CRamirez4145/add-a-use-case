@@ -1478,16 +1478,19 @@ Details:
   - 5a2. The system closes the dialog and returns to the student's details without sending a deactivation request, modifying any data, or displaying a success message.
   - 5a3. Use case ends.
 - **6a. Student is already deactivated when the request is processed:**
+  - This extension applies only after authorization succeeds; extension 6c takes precedence.
   - 6a1. This includes another authorized instructor deactivating the student after the confirmation dialog is displayed and before the request is processed.
   - 6a2. The system displays "Student is already deactivated" without modifying any data or reporting a new successful deactivation.
   - 6a3. Use case ends.
 - **6b. Student was deleted before the deactivation request is processed:**
+  - This extension applies only after authorization succeeds; extension 6c takes precedence.
   - 6b1. The system treats the request as a not-found condition and displays "Student no longer exists".
   - 6b2. The system makes no changes and does not report successful deactivation.
   - 6b3. Use case ends.
 - **6c. Requesting user is not authorized when the deactivation request is processed:**
   - 6c1. Before changing any data, the system checks the requesting user's current authorization under BR-student-lifecycle and BR-section-scoped-access, including permission changes since the confirmation dialog opened.
   - 6c2. If authorization fails, the system denies the request, makes no changes, and displays "You are not authorized to deactivate this student."
+  - Authorization denial takes precedence over extensions 6a and 6b. The system does not disclose whether the student is deactivated or deleted to an unauthorized user.
   - 6c3. Use case ends.
 
 **Priority:** Low
