@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import team.projectpulse.AbstractIntegrationTest;
 import team.projectpulse.instructor.Instructor;
@@ -37,6 +38,7 @@ class StudentLifecycleAccessIntegrationTest extends AbstractIntegrationTest {
     @Autowired EntityManager em;
     @Autowired JdbcTemplate jdbc;
     @Autowired JwtDecoder decoder;
+    @Autowired JwtAuthenticationConverter authenticationConverter;
     private static final String BASE = "/api/v1";
 
     @AfterEach
@@ -163,7 +165,8 @@ class StudentLifecycleAccessIntegrationTest extends AbstractIntegrationTest {
     @Test
     void scopedServiceLookupRefusesForeignStudentAndDeletedAuthorizedTarget() throws Exception {
         String token = login("b.gates@abc.edu");
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(decoder.decode(token.substring(7))));
+        SecurityContextHolder.getContext().setAuthentication(authenticationConverter.convert(decoder.decode(token.substring(7))));
+        assertThat(service.findStudentById(target().getId())).isNotNull();
         Student foreign = students.findAll().stream().filter(student -> student.getSection().getCourse().getCourseAdmin()
                 .getUsername().equals("t.cook@abc.edu")).findFirst().orElseThrow();
         assertThatThrownBy(() -> service.findStudentById(foreign.getId())).isInstanceOf(ObjectNotFoundException.class);
@@ -181,7 +184,7 @@ class StudentLifecycleAccessIntegrationTest extends AbstractIntegrationTest {
         int id = student.getId();
         section.getStudents().remove(student);
         students.delete(student); em.flush();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(decoder.decode(token.substring(7))));
+        SecurityContextHolder.getContext().setAuthentication(authenticationConverter.convert(decoder.decode(token.substring(7))));
         assertThatThrownBy(() -> service.findStudentById(id)).isInstanceOf(ObjectNotFoundException.class);
     }
 
@@ -213,5 +216,47 @@ class StudentLifecycleAccessIntegrationTest extends AbstractIntegrationTest {
         Student student = target(); student.setTeam(null); em.flush();
         mvc.perform(post(command(student)).header("Authorization", login("b.gates@abc.edu")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.student.teamId").isEmpty());
+    }
+
+    @Test
+    void deletedStudentAfterDetailsReturnsCommandNotFoundWithoutWrites() throws Exception {
+        Student temporary = new Student("deleted-lifecycle@example.test", "Temporary", "Student",
+                "deleted-lifecycle@example.test", "unused", true, "student");
+        var section = target().getSection(); section.addStudent(temporary); students.saveAndFlush(temporary);
+        String token = login("b.gates@abc.edu");
+        mvc.perform(get(details(temporary)).header("Authorization", token)).andExpect(status().isOk());
+        String commandUrl = command(temporary);
+        section.getStudents().remove(temporary); students.delete(temporary); em.flush();
+        var before = history();
+        mvc.perform(post(commandUrl).header("Authorization", token)).andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Student no longer exists")).andExpect(jsonPath("$.data").isEmpty());
+        assertThat(history()).isEqualTo(before);
+    }
+
+    @Test
+    void courseOwnershipRevokedAfterOwnerDetailsReadDeniesCommand() throws Exception {
+        Student student = target(); unassignOwner(student, true);
+        String token = login("b.wei@abc.edu");
+        mvc.perform(get(details(student)).header("Authorization", token)).andExpect(status().isOk());
+        student.getSection().getCourse().setCourseAdmin((Instructor) users.findByUsername("t.cook@abc.edu").orElseThrow());
+        em.flush();
+        var before = history();
+        mvc.perform(post(command(student)).header("Authorization", token)).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("You are not authorized to deactivate this student."));
+        assertThat(student.isEnabled()).isTrue(); assertThat(history()).isEqualTo(before);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void activeStudentCannotDeactivateAnotherActiveInactiveOrAbsentTarget(boolean enabled) throws Exception {
+        Student eric = (Student) users.findByUsername("e.hudson@abc.edu").orElseThrow(); eric.setEnabled(enabled); em.flush();
+        String token = login("j.smith@abc.edu");
+        for (int id : List.of(eric.getId(), Integer.MAX_VALUE)) {
+            mvc.perform(post(BASE + "/sections/" + eric.getSection().getSectionId() + "/students/" + id + "/deactivation")
+                    .header("Authorization", token)).andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value("You are not authorized to deactivate this student."))
+                    .andExpect(jsonPath("$.data").isEmpty());
+        }
+        assertThat(eric.isEnabled()).isEqualTo(enabled);
     }
 }
