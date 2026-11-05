@@ -364,7 +364,7 @@ A business rule (`BR-*`, owned by [business-rules.md](requirements/business-rule
 | `BR-rubric-admin-only` | `UC-RUB-add-criterion`, `UC-RUB-create-criterion`, `UC-RUB-create-rubric`, `UC-RUB-delete-criterion`, `UC-RUB-delete-rubric`, `UC-RUB-edit-criterion`, `UC-RUB-edit-rubric`, `UC-RUB-remove-criterion` | — | — |
 | `BR-section-admin-only` | `UC-RUB-assign-rubric`, `UC-SEC-create-section`, `UC-SEC-edit-section`, `UC-SEC-setup-active-weeks` | — | — |
 | `BR-section-config-access` | `UC-CFG-configure-assistant-instructions`, `UC-CFG-configure-review-criteria`, `UC-CFG-configure-teaching-context`, `UC-CFG-toggle-assistants` | — | — |
-| `BR-section-scoped-access` | `UC-EVA-section-evaluation-report`, `UC-EVA-student-evaluation-report`, `UC-NOT-remind-non-submitters`, `UC-WAR-student-war-report`, `UC-WAR-team-war-report` | `FR-SEC-authorization`, `SEC-authorization` | `QS-cross-team-denial` |
+| `BR-section-scoped-access` | `UC-EVA-section-evaluation-report`, `UC-EVA-student-evaluation-report`, `UC-NOT-remind-non-submitters`, `UC-STU-deactivate-student`, `UC-WAR-student-war-report`, `UC-WAR-team-war-report` | `FR-SEC-authorization`, `SEC-authorization` | `QS-cross-team-denial` |
 | `BR-source-material-import` | `UC-AI-import-source-material` | — | — |
 | `BR-submission-owed` | `UC-EVA-section-evaluation-report`, `UC-NOT-remind-non-submitters`, `UC-WAR-team-war-report` | `FR-NOT-weekly-reminder` | — |
 | `BR-student-lifecycle` | `UC-STU-deactivate-student`, `UC-STU-delete-student`, `UC-STU-reactivate-student` | `FR-SEC-active-account` | — |
