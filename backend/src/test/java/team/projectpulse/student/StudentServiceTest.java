@@ -71,6 +71,9 @@ class StudentServiceTest {
         Student rosendo = new Student("rosendo", "Rosendo", "Maxwell", "r.maxwell@abc.edu", "123456", true, "student");
 
         this.students = List.of(john, eric, jerry, woody, amanda, cora, agustin, mavis, mary, rosendo);
+        Section section = new Section();
+        section.setSectionId(2);
+        this.students.forEach(student -> student.setSection(section));
     }
 
     @AfterEach
@@ -134,6 +137,7 @@ class StudentServiceTest {
         // Given
         Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
         given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        given(this.studentRepository.findForUpdateByIdAndSection(1, 2)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();
@@ -161,6 +165,7 @@ class StudentServiceTest {
         // Given
         Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
         given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        given(this.studentRepository.findForUpdateByIdAndSection(1, 2)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();

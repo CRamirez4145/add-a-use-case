@@ -7,7 +7,6 @@ import team.projectpulse.system.exception.ObjectNotFoundException;
 import team.projectpulse.user.userinvitation.UserInvitationService;
 import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -47,7 +46,11 @@ public class StudentService {
         }
         Student student = this.studentRepository.findForUpdateByIdAndSection(studentId, sectionId)
                 .orElseThrow(StudentDeactivationNotFoundException::new);
-        this.entityManager.refresh(student, LockModeType.PESSIMISTIC_WRITE);
+        // Retain the row lock, but discard first-level-cache state. A refresh may use
+        // an unlocked snapshot read even when PESSIMISTIC_WRITE was requested.
+        this.entityManager.detach(student);
+        student = this.studentRepository.findForUpdateByIdAndSection(studentId, sectionId)
+                .orElseThrow(StudentDeactivationNotFoundException::new);
         if (!student.isEnabled()) {
             return new StudentDeactivation(StudentDeactivation.Outcome.ALREADY_DEACTIVATED, student);
         }
@@ -129,7 +132,10 @@ public class StudentService {
 
         // Serialize stale profile forms with lifecycle writes as well: a full-row update must
         // never restore enabled from an entity loaded before a concurrent deactivation committed.
-        this.entityManager.refresh(oldStudent, LockModeType.PESSIMISTIC_WRITE);
+        Integer sectionId = oldStudent.getSection().getSectionId();
+        this.entityManager.detach(oldStudent);
+        oldStudent = this.studentRepository.findForUpdateByIdAndSection(studentId, sectionId)
+                .orElseThrow(() -> new ObjectNotFoundException("student", studentId));
         if (oldStudent.isEnabled() != update.isEnabled()) {
             throw new IllegalArgumentException("Account status cannot be changed through a profile update.");
         }

@@ -27,8 +27,9 @@ public interface StudentRepository extends JpaRepository<Student, Integer>, JpaS
 
     /**
      * Shared serialization point for deactivation and evaluation writes. The caller must hold a transaction.
-     * An evaluation caller that already loaded the student must also refresh it under this lock before
-     * checking enabled: acquiring a lock does not refresh Hibernate's first-level cache.
+     * Acquiring a lock does not replace first-level-cache state. Callers must detach the returned
+     * target and repeat this scoped locking query before checking enabled, retaining the lock
+     * throughout. Do not refresh afterward: Hibernate may issue an unlocked snapshot read.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select student from Student student where student.id = :studentId and student.section.sectionId = :sectionId")

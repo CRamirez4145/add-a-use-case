@@ -62,8 +62,12 @@ class StudentDeactivationServiceTest {
     @ValueSource(booleans = {true, false})
     void changedStatusRejectsAllProfileChanges(boolean enabled) {
         Student student = new Student("original", "First", "Last", "email", "hash", enabled, "student");
+        var section = new team.projectpulse.section.Section();
+        section.setSectionId(1);
+        student.setSection(section);
         Student update = new Student("changed", "Changed", "Changed", "changed", "", !enabled, "student");
         when(studentRepository.findById(7)).thenReturn(Optional.of(student));
+        when(studentRepository.findForUpdateByIdAndSection(7, 1)).thenReturn(Optional.of(student));
         assertThatThrownBy(() -> service.updateStudent(7, update)).isInstanceOf(IllegalArgumentException.class);
         assertThat(student.getUsername()).isEqualTo("original");
         assertThat(student.getFirstName()).isEqualTo("First");

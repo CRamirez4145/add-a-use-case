@@ -32,9 +32,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluationServiceTest {
+
+    @Mock
+    jakarta.persistence.EntityManager entityManager;
 
     @Mock
     PeerEvaluationRepository evaluationRepository;
@@ -135,6 +139,11 @@ class EvaluationServiceTest {
         team2.addStudent(amanda);
 
         this.students = List.of(john, eric, jerry, woody, amanda);
+        lenient().when(this.studentRepository.findForUpdateByIdAndSection(anyInt(), anyInt()))
+                .thenAnswer(invocation -> this.students.stream()
+                        .filter(student -> student.getId().equals(invocation.getArgument(0)))
+                        .filter(student -> student.getSection().getSectionId().equals(invocation.getArgument(1)))
+                        .findFirst());
         this.john = john;
         this.eric = eric;
         this.woody = woody;
