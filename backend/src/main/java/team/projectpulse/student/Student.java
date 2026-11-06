@@ -4,8 +4,11 @@ import team.projectpulse.section.Section;
 import team.projectpulse.team.Team;
 import team.projectpulse.user.PeerEvaluationUser;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
+// Team/password writes must not restore a cached enabled value after deactivation commits.
+@DynamicUpdate
 public class Student extends PeerEvaluationUser {
 
     @ManyToOne(optional = false)
