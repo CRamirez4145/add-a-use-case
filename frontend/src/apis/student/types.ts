@@ -13,6 +13,16 @@ export interface Student {
   teamName?: string
 }
 
+export interface DeactivateStudentResponse {
+  flag: boolean
+  code: number
+  message: string
+  data: {
+    outcome: 'DEACTIVATED' | 'ALREADY_DEACTIVATED'
+    student: Student
+  }
+}
+
 export interface PaginationParams {
   page: number
   size: number

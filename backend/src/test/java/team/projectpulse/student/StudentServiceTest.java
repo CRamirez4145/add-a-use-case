@@ -36,6 +36,11 @@ import static org.mockito.Mockito.*;
 class StudentServiceTest {
 
     @Mock
+    StudentSecurityService studentSecurityService;
+    @Mock
+    jakarta.persistence.EntityManager entityManager;
+
+    @Mock
     StudentRepository studentRepository;
     @Mock
     SectionRepository sectionRepository;
@@ -66,6 +71,9 @@ class StudentServiceTest {
         Student rosendo = new Student("rosendo", "Rosendo", "Maxwell", "r.maxwell@abc.edu", "123456", true, "student");
 
         this.students = List.of(john, eric, jerry, woody, amanda, cora, agustin, mavis, mary, rosendo);
+        Section section = new Section();
+        section.setSectionId(2);
+        this.students.forEach(student -> student.setSection(section));
     }
 
     @AfterEach
@@ -92,7 +100,8 @@ class StudentServiceTest {
     void testFindStudentById() {
         // Given
         Student john = this.students.get(0);
-        given(this.studentRepository.findById(1)).willReturn(Optional.of(john));
+        given(this.userUtils.getUserId()).willReturn(4);
+        given(this.studentRepository.findReadableById(1, 4)).willReturn(Optional.of(john));
 
         // When
         Student result = this.studentService.findStudentById(1);
@@ -126,8 +135,9 @@ class StudentServiceTest {
     @Test
     void testStudentUpdateOwnInfo() {
         // Given
-        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", false, "admin student");
+        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
         given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        given(this.studentRepository.findForUpdateByIdAndSection(1, 2)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();
@@ -147,14 +157,15 @@ class StudentServiceTest {
         assertThat(result.getLastName()).isEqualTo(update.getLastName());
         assertThat(result.getEmail()).isEqualTo(update.getEmail());
         assertThat(result.getRoles()).isNotEqualTo(update.getRoles());
-        assertThat(result.isEnabled()).isNotEqualTo(update.isEnabled());
+        assertThat(result.isEnabled()).isEqualTo(update.isEnabled());
     }
 
     @Test
     void testInstructorUpdatesStudent() {
         // Given
-        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", false, "admin student");
+        Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", true, "admin student");
         given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
+        given(this.studentRepository.findForUpdateByIdAndSection(1, 2)).willReturn(Optional.of(this.students.get(0)));
         given(this.studentRepository.save(any(Student.class))).willReturn(this.students.get(0));
 
         Instructor instructor = new Instructor();

@@ -26,5 +26,13 @@ public record PeerEvaluationDto(Integer evaluationId,
                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
                                 LocalDateTime createdAt,
                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
-                                LocalDateTime updatedAt) {
+                                LocalDateTime updatedAt,
+                                Boolean evaluatorEnabled,
+                                Boolean evaluateeEnabled) {
+    public PeerEvaluationDto(Integer evaluationId, String week, Integer evaluatorId, String evaluatorName,
+            Integer evaluateeId, String evaluateeName, List<RatingDto> ratings, Double totalScore,
+            String publicComment, String privateComment, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this(evaluationId, week, evaluatorId, evaluatorName, evaluateeId, evaluateeName, ratings, totalScore,
+                publicComment, privateComment, createdAt, updatedAt, null, null);
+    }
 }

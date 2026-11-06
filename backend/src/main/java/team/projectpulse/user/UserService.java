@@ -37,6 +37,11 @@ public class UserService implements UserDetailsService {
         return this.userRepository.findByEmail(email).isPresent();
     }
 
+    /** Current persisted status for either account subtype; failures propagate to authentication. */
+    public boolean isAccountActive(Integer userId) {
+        return userId != null && this.userRepository.findAccountEnabledById(userId).orElse(false);
+    }
+
     public void resetPassword(Map<String, String> resetPasswordInfo) {
         String email = resetPasswordInfo.get("email");
         String token = resetPasswordInfo.get("token");

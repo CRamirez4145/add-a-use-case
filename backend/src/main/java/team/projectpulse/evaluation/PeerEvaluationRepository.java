@@ -11,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface PeerEvaluationRepository extends JpaRepository<PeerEvaluation, Integer> {
 
+    @Query("select count(e) > 0 from PeerEvaluation e where e.week = :week and (e.evaluator.id = :studentId or e.evaluatee.id = :studentId)")
+    boolean hasHistoricalParticipation(String week, Integer studentId);
+
     List<PeerEvaluation> findByWeekAndEvaluateeId(String week, Integer studentId);
 
     Optional<PeerEvaluation> findByWeekAndEvaluatorIdAndEvaluateeId(String week, Integer evaluatorId, Integer evaluateeId);

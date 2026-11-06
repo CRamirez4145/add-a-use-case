@@ -12,6 +12,52 @@ const requestInstance = axios.create({ baseURL, timeout: 10_000 }) // 10 seconds
 
 // Simple toast cooldown (prevents spam on cascading failures)
 let lastToastAt = 0
+let deactivationFeedbackSequence = 0
+
+// Only lifecycle-command denials need to wait for rendered feedback before redirecting.
+// Observe browser rendering rather than guessing how long Vue/CSS transitions will take.
+function showDeactivationError(message: string): Promise<boolean> {
+  const feedbackClass = `deactivation-error-feedback-${++deactivationFeedbackSequence}`
+  return new Promise((resolve) => {
+    let frame = 0
+    ElMessage.error({
+      message,
+      customClass: feedbackClass,
+      onClose: () => {
+        cancelAnimationFrame(frame)
+        resolve(false)
+      }
+    })
+    const checkVisibility = () => {
+      const element = document.querySelector<HTMLElement>(`.${feedbackClass}`)
+      if (element) {
+        const style = getComputedStyle(element)
+        const bounds = element.getBoundingClientRect()
+        if (
+          style.display !== 'none' &&
+          style.visibility === 'visible' &&
+          Number(style.opacity) > 0 &&
+          !element.classList.contains('el-message-fade-enter-active') &&
+          bounds.width > 0 &&
+          bounds.height > 0 &&
+          bounds.bottom > 0 &&
+          bounds.top < innerHeight &&
+          element.contains(
+            document.elementFromPoint(
+              bounds.left + bounds.width / 2,
+              bounds.top + bounds.height / 2
+            )
+          )
+        ) {
+          resolve(true)
+          return
+        }
+      }
+      frame = requestAnimationFrame(checkVisibility)
+    }
+    frame = requestAnimationFrame(checkVisibility)
+  })
+}
 
 /**
  * Shows an error toast message with a short cooldown to prevent
@@ -107,6 +153,18 @@ requestInstance.interceptors.response.use(
 
     const { status, data } = error.response
     const msg = (data && (data.message || data.error)) || `HTTP ${status}: Something went wrong`
+
+    const isDeactivationError =
+      (status === 403 || status === 404) &&
+      error.config?.method?.toLowerCase() === 'post' &&
+      /\/sections\/[^/]+\/students\/[^/]+\/deactivation\/?$/.test(error.config?.url || '')
+    if (isDeactivationError) {
+      return showDeactivationError(msg).then((visible) => {
+        const destination = status === 403 ? 'forbidden' : 'not-found'
+        if (visible && !isOnRoute(destination)) router.push({ name: destination })
+        return Promise.reject(error)
+      })
+    }
 
     // Avoid toasting on 401 (we redirect instead)
     if (status !== 401) toastOnce(msg)

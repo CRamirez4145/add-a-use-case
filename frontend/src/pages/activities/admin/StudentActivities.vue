@@ -24,6 +24,12 @@
           height="600"
         >
           <el-table-column label="Week" prop="week"></el-table-column>
+          <el-table-column label="Account status"
+            ><template #default="{ row }"
+              ><el-tag v-if="row.studentEnabled === false" type="info">Deactivated</el-tag
+              ><span v-else>Active</span></template
+            ></el-table-column
+          >
           <el-table-column label="Category" min-width="150" prop="category">
             <template #default="{ row }">
               <el-tag type="warning">{{ row.category }}</el-tag>

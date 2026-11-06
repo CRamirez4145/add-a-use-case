@@ -9,6 +9,7 @@ import team.projectpulse.student.Student;
 import team.projectpulse.student.StudentRepository;
 import team.projectpulse.team.Team;
 import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,15 @@ public class EvaluationService {
     private final StudentRepository studentRepository;
     private final SectionRepository sectionRepository;
     private final Clock clock; // Clock bean is defined in PeerEvaluationToolApplication.java, this object is for unit testing purposes.
+    private final EntityManager entityManager;
 
 
-    public EvaluationService(PeerEvaluationRepository evaluationRepository, StudentRepository studentRepository, SectionRepository sectionRepository, Clock clock) {
+    public EvaluationService(PeerEvaluationRepository evaluationRepository, StudentRepository studentRepository, SectionRepository sectionRepository, Clock clock, EntityManager entityManager) {
         this.evaluationRepository = evaluationRepository;
         this.studentRepository = studentRepository;
         this.sectionRepository = sectionRepository;
         this.clock = clock;
+        this.entityManager = entityManager;
     }
 
     public PeerEvaluation addPeerEvaluation(PeerEvaluation newPeerEvaluation) {
@@ -58,6 +61,9 @@ public class EvaluationService {
         if (evaluatorTeam == null) {
             throw new PeerEvaluationIllegalArgumentException("You must be assigned to a team before submitting a peer evaluation.");
         }
+
+        newPeerEvaluation.setEvaluatee(requireActiveEvaluatee(newPeerEvaluation.getEvaluatee().getId(),
+                newPeerEvaluation.getEvaluator().getSection().getSectionId()));
 
         // Make sure the evaluator and evaluatee are on the same team. Compare team ids: Team does not override
         // equals, so comparing the entities is identity comparison and only happens to hold within one session.
@@ -81,12 +87,28 @@ public class EvaluationService {
                     // The week is read off the stored evaluation rather than off the update, because the caller
                     // writes the payload and could otherwise name an open week to reopen a closed evaluation.
                     requireOpenSubmissionWindow(oldEvaluation.getEvaluator().getSection(), oldEvaluation.getWeek(), WINDOW_CLOSED_MESSAGE);
+                    requireActiveEvaluatee(oldEvaluation.getEvaluatee().getId(),
+                            oldEvaluation.getEvaluator().getSection().getSectionId());
                     rescore(oldEvaluation, update.getRatings());
                     oldEvaluation.setPublicComment(update.getPublicComment());
                     oldEvaluation.setPrivateComment(update.getPrivateComment());
                     return this.evaluationRepository.save(oldEvaluation);
                 })
                 .orElseThrow(() -> new ObjectNotFoundException("evaluation", evaluationId));
+    }
+
+    private Student requireActiveEvaluatee(Integer studentId, Integer sectionId) {
+        Student student = this.studentRepository.findForUpdateByIdAndSection(studentId, sectionId)
+                .orElseThrow(() -> new ObjectNotFoundException("student", studentId));
+        // Keep the acquired lock and reload without first-level-cache state. A subsequent
+        // refresh can otherwise restore an older MySQL repeatable-read snapshot.
+        this.entityManager.detach(student);
+        student = this.studentRepository.findForUpdateByIdAndSection(studentId, sectionId)
+                .orElseThrow(() -> new ObjectNotFoundException("student", studentId));
+        if (!student.isEnabled()) {
+            throw new PeerEvaluationIllegalArgumentException("A deactivated student cannot be evaluated.");
+        }
+        return student;
     }
 
     /**
@@ -174,6 +196,7 @@ public class EvaluationService {
         PeerEvaluationAverage peerEvaluationAverage = new PeerEvaluationAverage();
 
         peerEvaluationAverage.setStudentId(student.getId());
+        peerEvaluationAverage.setEnabled(student.isEnabled());
         peerEvaluationAverage.setWeek(week);
         peerEvaluationAverage.setFirstName(student.getFirstName());
         peerEvaluationAverage.setLastName(student.getLastName());
@@ -221,7 +244,10 @@ public class EvaluationService {
         report.setSectionName(this.sectionRepository.findById(sectionId).orElseThrow(() -> new ObjectNotFoundException("section", sectionId)).getSectionName());
 
         // Get all students in the section
-        List<Student> students = this.studentRepository.findBySectionSectionId(sectionId).stream().filter(student -> student.getTeam() != null).collect(Collectors.toList());
+        List<Student> students = this.studentRepository.findBySectionSectionId(sectionId).stream()
+                .filter(student -> student.getTeam() != null)
+                .filter(student -> student.isEnabled() || this.evaluationRepository.hasHistoricalParticipation(week, student.getId()))
+                .collect(Collectors.toList());
 
         // For each student, compute her average total score, collect all public comments and private comments, and compute rating averages for each criterion.
         students.forEach(student -> {
@@ -249,7 +275,9 @@ public class EvaluationService {
 
         List<String> weeks = getWeeksBetween(startWeek, endWeek);
 
-        List<PeerEvaluationAverage> peerEvaluationAverages = weeks.stream().map(week -> getPeerEvaluationAverage(week, student)).collect(Collectors.toList());
+        List<PeerEvaluationAverage> peerEvaluationAverages = weeks.stream()
+                .filter(week -> student.isEnabled() || this.evaluationRepository.hasHistoricalParticipation(week, studentId))
+                .map(week -> getPeerEvaluationAverage(week, student)).collect(Collectors.toList());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

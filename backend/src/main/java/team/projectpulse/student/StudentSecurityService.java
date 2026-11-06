@@ -1,6 +1,7 @@
 package team.projectpulse.student;
 
 import team.projectpulse.system.UserUtils;
+import team.projectpulse.section.SectionSecurityService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,25 @@ public class StudentSecurityService {
 
     private final StudentRepository studentRepository;
     private final UserUtils userUtils;
+    private final SectionSecurityService sectionSecurityService;
 
 
-    public StudentSecurityService(StudentRepository studentRepository, UserUtils userUtils) {
+    public StudentSecurityService(StudentRepository studentRepository, UserUtils userUtils, SectionSecurityService sectionSecurityService) {
         this.studentRepository = studentRepository;
         this.userUtils = userUtils;
+        this.sectionSecurityService = sectionSecurityService;
+    }
+
+    public boolean canDeactivateInSection(Integer sectionId) {
+        return sectionId != null && this.userUtils.getUserId() != null
+                && (this.sectionSecurityService.isSectionOwner(sectionId)
+                || this.sectionSecurityService.isSectionInstructor(sectionId));
+    }
+
+    public boolean canReadStudent(Integer studentId) {
+        Integer callerId = this.userUtils.getUserId();
+        return studentId != null && callerId != null
+                && this.studentRepository.findReadableById(studentId, callerId).isPresent();
     }
 
     public boolean isStudentSelf(Integer studentId) {
