@@ -2,7 +2,7 @@ package team.projectpulse.student;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import team.projectpulse.student.converter.StudentToStudentDtoConverter;
 import team.projectpulse.section.Section;
@@ -20,10 +20,15 @@ class StudentDeactivationControllerTest {
     private static final String URL = "/api/v1/sections/1/students/7/deactivation";
 
     @ParameterizedTest
-    @EnumSource(StudentDeactivation.Outcome.class)
-    void mapsBothHandledOutcomesInsideData(StudentDeactivation.Outcome outcome) throws Exception {
+    @CsvSource({
+            "DEACTIVATED, Student has been deactivated.",
+            "ALREADY_DEACTIVATED, Student is already deactivated"
+    })
+    void mapsBothHandledOutcomesInsideData(StudentDeactivation.Outcome outcome, String expectedMessage) throws Exception {
+        // UC step 6 / extension 6a and stu.md API contract: the oracle is literal contract text.
         Student student = new Student();
         student.setId(7);
+        student.setEnabled(false);
         Section section = new Section();
         section.setSectionId(1);
         student.setSection(section);
@@ -31,9 +36,11 @@ class StudentDeactivationControllerTest {
         when(service.deactivateStudent(1, 7)).thenReturn(result);
         mvc.perform(post(URL)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.flag").value(true))
-                .andExpect(jsonPath("$.message").value(result.message()))
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value(expectedMessage))
                 .andExpect(jsonPath("$.data.outcome").value(outcome.name()))
                 .andExpect(jsonPath("$.data.student.id").value(7))
+                .andExpect(jsonPath("$.data.student.sectionId").value(1))
                 .andExpect(jsonPath("$.data.student.enabled").value(false));
     }
 
